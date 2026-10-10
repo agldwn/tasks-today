@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,37 +9,67 @@
 <body>
 
 <nav>
-    <a href="/">Today</a>
-    <a href="/tasks">All Tasks</a>
-    <a href="/profile">Profile</a>
-    <a href="/about">About</a>
+    <a href="<?= base_url('/') ?>">Home</a>
+    <a href="<?= base_url('/tasks') ?>">All Tasks</a>
+    <a href="<?= base_url('/profile') ?>">Profile</a>
+    <a href="<?= base_url('/about') ?>">About</a>
+
+    <?php if (session()->get('isLoggedIn')): ?>
+        <a href="<?= base_url('/tasks/new') ?>">New Task</a>
+        <a href="<?= base_url('/logout') ?>">Logout</a>
+    <?php else: ?>
+        <a href="<?= base_url('/login') ?>">Login</a>
+    <?php endif; ?>
 </nav>
 
-<main>
-    <h1>All Tasks</h1>
+<h1>All Tasks</h1>
 
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Task</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
+<?php if (session()->getFlashdata('success')): ?>
+    <p><?= esc(session()->getFlashdata('success')) ?></p>
+<?php endif; ?>
 
-            <tbody>
-                <?php foreach ($tasks as $task): ?>
-                    <tr>
-                        <td><?= esc($task['title']) ?></td>
-                        <td><?= esc($task['status']) ?></td>
-                        <td><?= esc($task['task_date']) ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-</main>
+<table>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Task Date</th>
+
+            <?php if (session()->get('isLoggedIn')): ?>
+                <th>Actions</th>
+            <?php endif; ?>
+        </tr>
+    </thead>
+
+    <tbody>
+        <?php foreach ($tasks as $task): ?>
+            <tr>
+                <td><?= esc($task['title']) ?></td>
+                <td><?= esc($task['status']) ?></td>
+                <td><?= esc($task['task_date']) ?></td>
+
+                <?php if (session()->get('isLoggedIn')): ?>
+                    <td>
+                        <a class="btn"
+                           href="<?= base_url('/tasks/edit/' . $task['id']) ?>">
+                            Edit
+                        </a>
+
+                        <form action="<?= site_url('/tasks/delete/' . $task['id']) ?>"
+                              method="post"
+                              style="display:inline;">
+                            <?= csrf_field() ?>
+                            <button type="submit"
+                                    onclick="return confirm('Archive this task?');">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                <?php endif; ?>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
 
 </body>
 </html>
